@@ -1,0 +1,18 @@
+def get_file_name(file_path):
+    return os.path.basename(file_path)
+
+def extract_end_time(file_name, time_format='%Y%m%d_%H%M%S'):
+    # Adjust the regular expression to match the new time format 'YYYYMMDD_HHMMSS'
+    match = re.search(r'\d{8}_\d{6}', file_name)
+    if match:
+        end_time_str = match.group()
+        end_time = datetime.strptime(end_time_str, time_format)
+        return end_time
+    else:
+        raise ValueError("No valid end time found in file name")
+
+def generate_hourly_ticks(end_time, duration_hours=6):
+    # Calculate the start time based on the end time and duration
+    start_time = end_time - timedelta(hours=duration_hours)
+    ticks = [start_time + timedelta(hours=i) for i in range(duration_hours + 1)]
+    return ticks
