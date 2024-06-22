@@ -1,0 +1,62 @@
+import os
+import re
+from datetime import datetime
+import numpy as np
+import matplotlib.pyplot as plt
+from netCDF4 import Dataset
+
+def list_files_with_month(directory, year, month):
+    """List all files in the directory that have the specified year and month in their filename."""
+    files = []
+    pattern = re.compile(rf'Eastgate__{year}{month:02d}\d{{2}}_\d{{6}}\.nc')
+    
+    for file_name in os.listdir(directory):
+        if pattern.match(file_name):
+            files.append(os.path.join(directory, file_name))
+    
+    return files
+
+def read_netcdf_file(file_path):
+    """Read data from a NetCDF file."""
+    with Dataset(file_path, 'r') as nc:
+        # Assuming variables named 'longitude', 'latitude', and 'data' are present in the NetCDF file.
+        # Adjust the variable names and extraction method as per the actual file structure.
+        lon = nc.variables['longitude'][:]
+        lat = nc.variables['latitude'][:]
+        data = nc.variables['data'][:]
+    return lon, lat, data
+
+def plot_contour(files):
+    """Plot contour plots for data from each file."""
+    plt.figure(figsize=(12, 8))
+    
+    for file_path in files:
+        lon, lat, data = read_netcdf_file(file_path)
+        file_name = os.path.basename(file_path)
+        
+        plt.contourf(lon, lat, data)
+        plt.colorbar()
+        plt.title(f"Contour Plot for {file_name}")
+        plt.xlabel('Longitude')
+        plt.ylabel('Latitude')
+        plt.show()
+
+def main():
+    network_drive_directory = r'\\path\to\network\drive'
+    
+    year = input("Enter the year (YYYY): ")
+    month = int(input("Enter the month (MM): "))
+    
+    files = list_files_with_month(network_drive_directory, year, month)
+    
+    if not files:
+        print(f"No files found for {year}-{month:02d}")
+    else:
+        print(f"Found {len(files)} files for {year}-{month:02d}:")
+        for file in files:
+            print(file)
+        
+        plot_contour(files)
+
+if __name__ == "__main__":
+    main()
